@@ -66,7 +66,9 @@ def pw_Oi(theta, phi, theta_prior):
 
 def px_Oi_fixedgrid(box_hwidth, localiz, cand_coords, 
                     cand_ang_size, theta_prior, step_size=0.1, 
-                    return_grids=False):
+                    return_grids=False,
+                    cand_PA:np.ndarray=None,
+                    cand_b:np.ndarray=None):
     """
     Calculate p(x|O_i), the primary piece of the analysis
 
@@ -91,6 +93,12 @@ def px_Oi_fixedgrid(box_hwidth, localiz, cand_coords,
             Step size for grid, in arcsec
         return_grids (bool, optional):
             if True, return the calculation grid
+        cand_PA (np.ndarray, optional):
+            PA of the galaxy on the sky in deg; usual E from N
+            Must be paired with cand_b
+        cand_b (np.ndarray, optional):
+            semi-minor b-axis of galaxy
+            Must be paired with cand_PA
 
     Returns:
         np.ndarray or tuple: p(x|O_i) values and the grids if return_grids = True
@@ -126,8 +134,11 @@ def px_Oi_fixedgrid(box_hwidth, localiz, cand_coords,
     for icand, cand_coord in enumerate(cand_coords):
 
         # Offsets from the transient (approximate + flat sky)
-        theta = 3600*np.sqrt(np.cos(cand_coord.dec).value**2 * (
-            ra-cand_coord.ra.deg)**2 + (dec-cand_coord.dec.deg)**2)  # arc sec
+        if cand_PA is None:
+            theta = 3600*np.sqrt(np.cos(cand_coord.dec).value**2 * (
+                ra-cand_coord.ra.deg)**2 + (dec-cand_coord.dec.deg)**2)  # arc sec
+        else:
+            embed(header='141 of bayesian')
 
         # p(w|O_i)
         p_wOi = pw_Oi(theta,
